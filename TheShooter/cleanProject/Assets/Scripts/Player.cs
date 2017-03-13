@@ -4,11 +4,14 @@ using UnityEngine;
 
 public class Player : MonoBehaviour {
 
-    public Vector3 playerPosition;
-    public float speed = 0.15f;
+    private Vector3 playerPosition;
+    public float    speed = 0.15f;
 
-	// Use this for initialization
-	void Start ()
+    public Plane    playerPlane;
+    public Ray      ray;
+
+    // Use this for initialization
+    void Start ()
     {
 		
 	}
@@ -17,16 +20,29 @@ public class Player : MonoBehaviour {
 	void Update ()
     {
         Move();
+        Rotation();
     }
 
-    void Move()
+    private void Move()
     {
+        //transform.Translate(transform.right * Input.GetAxis("Horizontal") * speed);
+        //transform.Translate(transform.forward * Input.GetAxis("Vertical") * speed);
+        
+        transform.Translate(Input.GetAxis("Horizontal") * speed, 0, Input.GetAxis("Vertical") * speed, Space.World);
+    }
 
-        playerPosition.x += Input.GetAxis("Horizontal") * speed;
-        playerPosition.z += Input.GetAxis("Vertical") * speed;
+    private void Rotation()
+    {
+        playerPlane = new Plane(Vector3.up, transform.position);
+        ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        float hitdist;
 
-        transform.position = playerPosition;
+        if (playerPlane.Raycast(ray, out hitdist))
+        {
+            Vector3 targetPoint = ray.GetPoint(hitdist);
+            Quaternion targetRotation = Quaternion.LookRotation(targetPoint - transform.position);
 
-        Debug.Log("Horizontal " + Input.mousePosition);
+            transform.rotation = targetRotation;
+        }
     }
 }
